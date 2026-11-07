@@ -200,3 +200,15 @@ fn extended() {
 fn random_values() {
     assert_eq!(1_999u64.to_roman(), "MCMXCIX");
 }
+
+#[test]
+fn branch() {
+    assert_eq!(0u64.to_roman(), "nulla");
+    assert_eq!(1u64.to_roman(), "I");
+    assert_eq!(5u64.to_roman(), "V");
+    assert_eq!(10u64.to_roman(), "X");
+    assert_eq!(50u64.to_roman(), "L");
+    assert_eq!(100u64.to_roman(), "C");
+    assert_eq!(500u64.to_roman(), "D");
+    assert_eq!(1_000u64.to_roman(), "M");
+}

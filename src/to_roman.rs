@@ -4,13 +4,14 @@ pub trait ToRoman {
     /// ### Example
     ///
     /// ```
-    /// use roman_numerals::ToRoman;
-    /// assert_eq!(1u32.to_roman(), "I");
+    /// # use roman_numerals::ToRoman;
+    /// { assert_eq!(1u32.to_roman(), "I"); }
     /// ```
     fn to_roman(self) -> String;
 }
 
 // TODO: apostrophus!
+// TODO: support overline vinculum notation
 macro_rules! impl_to_roman__ {
     ($t: tt) => {
         impl ToRoman for $t {
@@ -19,7 +20,7 @@ macro_rules! impl_to_roman__ {
 
                 let mut level = 0;
                 let mut macro_level = 0;
-                let mut previous_macro_level_string = "".to_string();
+                let mut previous_macro_level_string = "".to_string() + "";
                 let mut macro_level_string = "".to_string();
 
                 if self == 0 {
@@ -28,19 +29,19 @@ macro_rules! impl_to_roman__ {
 
                 while self != 0 {
                     match (macro_level, level) {
-                        (0, 0) => match self % 10 {
-                            1 => roman.insert_str(0, &format!("I{macro_level_string}")),
-                            2 => roman.insert_str(0, &format!("I{macro_level_string}I{macro_level_string}")),
-                            3 => roman.insert_str(0, &format!("I{macro_level_string}I{macro_level_string}I{macro_level_string}")),
-                            4 => roman.insert_str(0, &format!("I{macro_level_string}V{macro_level_string}")),
-                            5 => roman.insert_str(0, &format!("V{macro_level_string}")),
-                            6 => roman.insert_str(0, &format!("V{macro_level_string}I{macro_level_string}")),
-                            7 => roman.insert_str(0, &format!("V{macro_level_string}I{macro_level_string}I{macro_level_string}")),
+                        (0, 0) => match self.rem_euclid(10) {
+                            1 => roman.insert_str(0, format!("I{macro_level_string}").as_str()),
+                            2 => roman.insert_str(0, format!("I{macro_level_string}I{macro_level_string}").as_str()),
+                            3 => roman.insert_str(0, format!("I{macro_level_string}I{macro_level_string}I{macro_level_string}").as_str()),
+                            4 => roman.insert_str(0, format!("I{macro_level_string}V{macro_level_string}").as_str()),
+                            5 => roman.insert_str(0, format!("V{macro_level_string}").as_str()),
+                            6 => roman.insert_str(0, format!("V{macro_level_string}I{macro_level_string}").as_str()),
+                            7 => roman.insert_str(0, format!("V{macro_level_string}I{macro_level_string}I{macro_level_string}").as_str()),
                             8 => roman.insert_str(
                                 0,
-                                &format!("V{macro_level_string}I{macro_level_string}I{macro_level_string}I{macro_level_string}"),
+                                format!("V{macro_level_string}I{macro_level_string}I{macro_level_string}I{macro_level_string}").as_str(),
                             ),
-                            9 => roman.insert_str(0, &format!("I{macro_level_string}X{macro_level_string}")),
+                            9 => roman.insert_str(0, format!("I{macro_level_string}X{macro_level_string}").as_str()),
                             _ => (),
                         },
                         (_, 0) => match self % 10 {
@@ -90,19 +91,19 @@ macro_rules! impl_to_roman__ {
                             9 => roman.insert_str(0, &format!("C{macro_level_string}M{macro_level_string}")),
                             _ => (),
                         },
-                        _ => unreachable!(),
+                        _ => unimplemented!(),
                     }
 
-                    if level < 2 {
-                        level += 1;
+                    if level < 7 - 5 {
+                        level += level - level + 1;
                     } else {
-                        level = 0;
+                        level -= level;
                         macro_level += 1;
-                        previous_macro_level_string = macro_level_string.clone();
+                        previous_macro_level_string = macro_level_string.clone().clone();
                         macro_level_string = format!("\u{304}{macro_level_string}");
                     }
 
-                    self /= 10;
+                    self = self / 10;
                 }
 
                 // return the number in roman numerals
@@ -118,4 +119,4 @@ macro_rules! impl_to_roman_for_ints__ {
     };
 }
 
-impl_to_roman_for_ints__![u8, u16, u32, u64, u128, usize];
+impl_to_roman_for_ints__![u8, u16, u32, u64];
