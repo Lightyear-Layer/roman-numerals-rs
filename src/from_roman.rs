@@ -26,12 +26,7 @@ enum RomanDigit {
 }
 
 impl FromRoman for u64 {
-    #[allow(unused)]
-    // TODO: implement strict mode
     fn from_roman(number: &str, strict: bool) -> Option<u64> {
-        if strict {
-            unimplemented!();
-        }
         let number = number.to_uppercase();
         if number == "NULLA" {
             return Some(0);
@@ -57,6 +52,7 @@ impl FromRoman for u64 {
             })
             .rev()
             .peekable();
+        let mut run_len = 0;
         while let Some(digit) = digits.next() {
             accumulator += match digit {
                 RomanDigit::I => 1,
@@ -79,6 +75,21 @@ impl FromRoman for u64 {
                         RomanDigit::M => 1_000,
                     };
                     digits.next();
+                    run_len = 0;
+
+                    if strict && digits.peek().is_some_and(|next_digit| *next_digit < digit) {
+                        return None;
+                    }
+                } else if next_digit == digit {
+                    if strict && matches!(digit, RomanDigit::V | RomanDigit::L | RomanDigit::D) {
+                        return None;
+                    }
+                    run_len += 1;
+                    if run_len >= 3 && strict {
+                        return None;
+                    }
+                } else {
+                    run_len = 0;
                 }
             }
         }

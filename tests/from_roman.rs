@@ -139,3 +139,17 @@ fn zero_to_one_hundred() {
     assert_eq!(u64::from_roman("XCIX", true), Some(99));
     assert_eq!(u64::from_roman("C", true), Some(100));
 }
+
+#[test]
+fn strict() {
+    assert!(u64::from_roman("IIII", true).is_none());
+    assert_eq!(u64::from_roman("IIII", false), Some(4));
+    assert!(u64::from_roman("IIIII", true).is_none());
+    assert!(u64::from_roman("MXXXXIII", true).is_none());
+    assert_eq!(u64::from_roman("MXXXXIII", false), Some(1043));
+    assert!(u64::from_roman("XVIX", true).is_none());
+    assert_eq!(u64::from_roman("XVIX", false), Some(24));
+    assert!(u64::from_roman("XIC", true).is_none());
+    assert_eq!(u64::from_roman("XIC", false), Some(109));
+    assert_eq!(u64::from_roman("CDXLIV", false), Some(444))
+}
