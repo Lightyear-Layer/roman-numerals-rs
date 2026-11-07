@@ -11,7 +11,7 @@ pub trait ToRoman {
 }
 
 // TODO: apostrophus!
-macro_rules! impl_to_roman {
+macro_rules! impl_to_roman__ {
     ($t: tt) => {
         impl ToRoman for $t {
             fn to_roman(mut self) -> String {
@@ -112,10 +112,10 @@ macro_rules! impl_to_roman {
     }
 }
 
-macro_rules! impl_to_roman_for_ints {
+macro_rules! impl_to_roman_for_ints__ {
     ($($t: ty),+) => {
-        $(impl_to_roman!($t);)+
+        $(impl_to_roman__!($t);)+
     };
 }
 
-impl_to_roman_for_ints![u8, u16, u32, u64, u128, usize];
+impl_to_roman_for_ints__![u8, u16, u32, u64, u128, usize];
