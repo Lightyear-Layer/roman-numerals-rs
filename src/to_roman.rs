@@ -10,6 +10,7 @@ pub trait ToRoman {
     fn to_roman(self) -> String;
 }
 
+// TODO: apostrophus!
 macro_rules! impl_to_roman {
     ($t: tt) => {
         impl ToRoman for $t {
@@ -55,6 +56,8 @@ macro_rules! impl_to_roman {
                                 &format!("V{macro_level_string}M{previous_macro_level_string}M{previous_macro_level_string}M{previous_macro_level_string}"),
                             ),
                             9 => roman.insert_str(0, &format!("M{previous_macro_level_string}X{macro_level_string}")),
+                            // #[cfg(feature = "expanded")]
+                            // TODO
                             _ => (),
                         },
                         (_, 1) => match self % 10 {

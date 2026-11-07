@@ -4,12 +4,12 @@
 ///
 /// ```
 /// use roman_numerals::FromRoman;
-/// assert_eq!(u64::from_roman("ABC"), None);
-/// assert_eq!(u64::from_roman("nulla"), Some(0));
-/// assert_eq!(u64::from_roman("I"), Some(1));
+/// assert_eq!(u64::from_roman("ABC", true), None);
+/// assert_eq!(u64::from_roman("nulla", true), Some(0));
+/// assert_eq!(u64::from_roman("I", true), Some(1));
 /// ```
 pub trait FromRoman {
-    fn from_roman(number: &str) -> Option<Self>
+    fn from_roman(number: &str, strict: bool) -> Option<Self>
     where
         Self: Sized;
 }
@@ -25,50 +25,51 @@ enum RomanDigit {
     M,
 }
 
-macro_rules! impl_from_roman {
-    ($t: tt) => {
-        impl FromRoman for $t {
-            fn from_roman(number: &str) -> Option<$t> {
-                // convert to upper case
-                let number = number.to_uppercase();
-
-                // test if zero
-                if number == "NULLA" {
-                    return Some(0);
-                }
-
-                // check that only valid characters are used
-                if !number
-                    .chars()
-                    .all(|c| matches!(c, 'I' | 'V' | 'X' | 'L' | 'C' | 'D' | 'M'))
-                {
-                    return None;
-                }
-
-                // create an accumulator
-                let mut accumulator: $t = 0;
-
-                // convert the string to a peekable iterator
-                // (reversed because we want to start from the units place)
-                let mut digits = number
-                    .chars()
-                    .map(|c| match c {
-                        'I' => RomanDigit::I,
-                        'V' => RomanDigit::V,
-                        'X' => RomanDigit::X,
-                        'L' => RomanDigit::L,
-                        'C' => RomanDigit::C,
-                        'D' => RomanDigit::D,
-                        'M' => RomanDigit::M,
-                        _ => unreachable!(),
-                    })
-                    .rev()
-                    .peekable();
-
-                // for every digit in the string
-                while let Some(digit) = digits.next() {
-                    // add the current digit to the accumulator
-                    accumulator += match digit {
+impl FromRoman for u64 {
+    #[allow(unused)]
+    // TODO: implement strict mode
+    fn from_roman(number: &str, strict: bool) -> Option<u64> {
+        if strict {
+            unimplemented!();
+        }
+        let number = number.to_uppercase();
+        if number == "NULLA" {
+            return Some(0);
+        }
+        if !number
+            .chars()
+            .all(|c| matches!(c, 'I' | 'V' | 'X' | 'L' | 'C' | 'D' | 'M'))
+        {
+            return None;
+        }
+        let mut accumulator: u64 = 0;
+        let mut digits = number
+            .chars()
+            .map(|c| match c {
+                'I' => RomanDigit::I,
+                'V' => RomanDigit::V,
+                'X' => RomanDigit::X,
+                'L' => RomanDigit::L,
+                'C' => RomanDigit::C,
+                'D' => RomanDigit::D,
+                'M' => RomanDigit::M,
+                _ => unreachable!(),
+            })
+            .rev()
+            .peekable();
+        while let Some(digit) = digits.next() {
+            accumulator += match digit {
+                RomanDigit::I => 1,
+                RomanDigit::V => 5,
+                RomanDigit::X => 10,
+                RomanDigit::L => 50,
+                RomanDigit::C => 100,
+                RomanDigit::D => 500,
+                RomanDigit::M => 1_000,
+            };
+            if let Some(&next_digit) = digits.peek() {
+                if next_digit < digit {
+                    accumulator -= match next_digit {
                         RomanDigit::I => 1,
                         RomanDigit::V => 5,
                         RomanDigit::X => 10,
@@ -77,49 +78,10 @@ macro_rules! impl_from_roman {
                         RomanDigit::D => 500,
                         RomanDigit::M => 1_000,
                     };
-
-                    // if there is a next digit ...
-                    if let Some(&next_digit) = digits.peek() {
-                        // ... which is smaller than the current digit
-                        if next_digit < digit {
-                            // subtract the next digit from the accumulator
-                            accumulator -= match next_digit {
-                                RomanDigit::I => 1,
-                                RomanDigit::V => 5,
-                                RomanDigit::X => 10,
-                                RomanDigit::L => 50,
-                                RomanDigit::C => 100,
-                                RomanDigit::D => 500,
-                                RomanDigit::M => 1_000,
-                            };
-
-                            // skip the next digit
-                            digits.next();
-                        }
-                    }
+                    digits.next();
                 }
-
-                // return the accumulator
-                Some(accumulator)
             }
         }
-    };
-}
-
-// Define a macro to implement FromRoman for all integer types.
-macro_rules! impl_from_roman_for_ints {
-    ($($t: ty),+) => {
-        $(impl_from_roman!($t);)+
-    };
-}
-
-// Implement FromRoman for all integer types.
-impl_from_roman_for_ints![u16, u32, u64, u128, usize];
-
-/// Implement FromRoman for u8.
-/// This had to be done separately because u8 cannot store the values of 500 and 1000.
-impl FromRoman for u8 {
-    fn from_roman(number: &str) -> Option<Self> {
-        u16::from_roman(number).map(|n| n.try_into().ok()).flatten()
+        Some(accumulator)
     }
 }
