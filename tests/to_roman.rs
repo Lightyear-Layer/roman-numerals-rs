@@ -13,6 +13,13 @@ fn basics() {
     assert_eq!(1_000u64.to_roman(), "M");
 }
 
+#[ignore]
+#[test]
+fn apostrophus() {
+    assert_eq!(500u64.to_roman(), "IↃ");
+    assert_eq!(501u64.to_roman(), "IↃI");
+}
+
 /// Test if the convertion works for numbers between 0 and 100u64.
 #[test]
 fn zero_to_one_hundred() {

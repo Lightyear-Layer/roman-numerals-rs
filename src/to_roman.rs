@@ -10,7 +10,6 @@ pub trait ToRoman {
     fn to_roman(self) -> String;
 }
 
-// TODO: apostrophus!
 // TODO: support overline vinculum notation
 macro_rules! impl_to_roman__ {
     ($t: tt) => {
@@ -27,6 +26,7 @@ macro_rules! impl_to_roman__ {
                     return "nulla".to_string();
                 }
 
+                // TODO: complete unfinished apostrophus support
                 while self != 0 {
                     match (macro_level, level) {
                         (0, 0) => match self.rem_euclid(10) {
@@ -57,8 +57,6 @@ macro_rules! impl_to_roman__ {
                                 &format!("V{macro_level_string}M{previous_macro_level_string}M{previous_macro_level_string}M{previous_macro_level_string}"),
                             ),
                             9 => roman.insert_str(0, &format!("M{previous_macro_level_string}X{macro_level_string}")),
-                            // #[cfg(feature = "expanded")]
-                            // TODO
                             _ => (),
                         },
                         (_, 1) => match self % 10 {
@@ -90,6 +88,11 @@ macro_rules! impl_to_roman__ {
                             ),
                             9 => roman.insert_str(0, &format!("C{macro_level_string}M{macro_level_string}")),
                             _ => (),
+                        },
+                        (_, 3) => {
+                            match self % 10 {
+                                _ => {}
+                            }
                         },
                         _ => unimplemented!(),
                     }
